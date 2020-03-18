@@ -19,15 +19,6 @@
 <script>
 export default {
 	name: 'createBtn',
-	props: {
-		select: {
-			type: String,
-			required: true
-		}
-	},
-	mounted () {
-		console.log(this.select);
-	},
 	methods: {
 		createPubTrigger () {
 			this.$emit('pubTrigger');

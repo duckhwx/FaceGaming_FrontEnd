@@ -99,7 +99,7 @@
             </v-layout>
         </v-expand-transition>
 
-        <CreateBtn v-on:pubTrigger="createPub" :select="data"></CreateBtn>
+        <CreateBtn v-on:pubTrigger="createPub"></CreateBtn>
 
         <v-snackbar class="snackbar"
             v-model="createPubMessage"

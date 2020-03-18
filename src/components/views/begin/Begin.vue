@@ -50,139 +50,61 @@
 		v-for="(publication, index) in publications"
 		:key="index">
 			<v-flex xs12 sm7>
-					<v-card>
-							<v-list-item>
-								<v-list-item-avatar
-								class="mx-2 my-3"
-								size="35"
-								>
-									<v-img
-									:src="publication.FILE_NAME.userImg"
-									></v-img>
-								</v-list-item-avatar>
-								<v-list-item-content>
-									<v-list-item-title>
-										{{publication.USERNAME}}
-									</v-list-item-title>
-								</v-list-item-content>
-								<Edit2 v-on:pubEdit="editPub(publication.ID)"
-							v-if="userID === publication.USER_ID"></Edit2>
-							</v-list-item>
-								<v-divider></v-divider>
-							<v-card-text class="text-md-left">{{publication.TITLE}}</v-card-text>
-							<v-layout
-							v-if="publication.FILES.length != 0"
-							justify-center
-							>
-								<v-container fluid>
-											<v-row dense>
-													<v-col class="imgCol d-inline-block"
-													v-for="file in publication.FILES"
-													:key="file.id"
-													:cols="file.FLEX">
-														<v-layout
-														class="mb-2"
-														v-if="file.error === true"
-														align-center
-														justify-center
-														column>
-															<v-icon
-															size="40">
-																fas fa-exclamation-triangle
-															</v-icon>
-															<div class="mt-3">{{file.message}}</div>
-														</v-layout>
-
-														<v-img
-															v-else
-															class="images align-end"
-															:src="file.FILE"
-															height="200"
-															@click="openDialogImg(publication.ID)"
-														></v-img>
-													</v-col>
-											</v-row>
-								</v-container>
-							</v-layout>
-
-							<!-- <v-row
-							v-if="files.length > 0"
-							>
-								<v-col>
-									<v-card
-									class="py-2"
-									elevation>
-										<v-layout justify-center>
-											<v-flex xs6 md12 lg12
-											v-for="(file, index) in files"
-											:key="index"
-											class="text-right px-2"
-											>
-												<v-layout justify-center>
-														<v-img
-														:src="filesImg[index]"
-														height="70"
-														width="50"
-														>
-															<v-btn
-															class="mx-1"
-															width="26"
-															height="26"
-															small
-															fab
-															top
-															@click="reduceFile(index)"
-															>
-																<v-icon
-																size="14"
-																>
-																	fas fa-times
-																</v-icon>
-															</v-btn>
-														</v-img>
-												</v-layout>
-											</v-flex>
-										</v-layout>
-									</v-card>
-								</v-col>
-							</v-row> -->
-
-						<!--<v-row align="center" justify="home">
-								<v-btn icon class="ml-5 mx-1">
-									<v-icon class="iconss" size="20">fas fa-thumbs-up</v-icon>
-								</v-btn>
-								<span class="mr-1">255</span>
-
-								<v-btn icon class="ml-1 mx-1">
-									<v-icon class="iconss" size="20">far fa-comment-alt</v-icon>
-								</v-btn>
-								<span class="mr-1">26</span>
-
-							</v-row>
-
+				<v-card>
+					<v-list-item>
+						<v-list-item-avatar
+						class="mx-2 my-3"
+						size="35"
+						>
+							<v-img
+							:src="publication.FILE_NAME.userImg"
+							></v-img>
+						</v-list-item-avatar>
+						<v-list-item-content>
+							<v-list-item-title>
+								{{publication.USERNAME}}
+							</v-list-item-title>
+						</v-list-item-content>
+						<Edit2 v-on:pubEdit="editPub(publication.ID)"
+					v-if="userID === publication.USER_ID"></Edit2>
+					</v-list-item>
 						<v-divider></v-divider>
+					<v-card-text class="text-md-left">{{publication.TITLE}}</v-card-text>
+					<v-layout
+					v-if="publication.FILES.length != 0"
+					justify-center
+					>
+						<v-container fluid>
+							<v-row dense>
+								<v-col class="imgCol d-inline-block"
+								v-for="file in publication.FILES"
+								:key="file.id"
+								:cols="file.FLEX">
+									<v-layout
+									class="mb-2"
+									v-if="file.error === true"
+									align-center
+									justify-center
+									column>
+										<v-icon
+										size="40">
+											fas fa-exclamation-triangle
+										</v-icon>
+										<div class="mt-3">{{file.message}}</div>
+									</v-layout>
 
-							<v-list-item>
-								<v-list-item-avatar
-									color= "grey"
-									size="28"
-								>
-									<v-img src="https://scontent.ffln2-1.fna.fbcdn.net/v/t1.0-9/17759737_587434668117902_4071095319899858470_n.jpg?_nc_cat=101&_nc_ohc=yVS6u26sDYYAX-Suc-k&_nc_ht=scontent.ffln2-1.fna&oh=3238e757ed57458c90538d45fb433c69&oe=5ECED5F9"></v-img>
-								</v-list-item-avatar>
-								<v-card-text class="text-md-left">Texto</v-card-text>
-							</v-list-item>
-
-							<v-divider></v-divider>
-
-							<v-list-item>
-								<v-list-item-avatar
-									size="28"
-									>
-									<v-img src="https://scontent.ffln2-1.fna.fbcdn.net/v/t1.0-9/17759737_587434668117902_4071095319899858470_n.jpg?_nc_cat=101&_nc_ohc=yVS6u26sDYYAX-Suc-k&_nc_ht=scontent.ffln2-1.fna&oh=3238e757ed57458c90538d45fb433c69&oe=5ECED5F9"></v-img>
-								</v-list-item-avatar>
-							<v-card-text class="text-md-left">Texto</v-card-text>
-							</v-list-item>-->
-					</v-card>
+									<v-img
+										v-else
+										class="images align-end"
+										:src="file.FILE"
+										height="200"
+										@click="openDialogImg(publication.ID)"
+									></v-img>
+								</v-col>
+							</v-row>
+						</v-container>
+					</v-layout>
+				</v-card>
 			</v-flex>
 		</v-layout>
 
