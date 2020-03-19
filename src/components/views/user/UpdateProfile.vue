@@ -188,83 +188,101 @@ export default {
 
 			console.log(this.images);
 			this.identifyInsertImage(userId)
-				.then((response) => {
-					for (let index = 0; index < response.length; index++) {
-						let resp = response[index];
+			// .then((response) => {
+			// 	for (let index = 0; index < response.length; index++) {
+			// 		let resp = response[index];
 
-						if (resp.response.data.error) {
-							continue;
-						}
+			// 		if (resp.response.data.error) {
+			// 			continue;
+			// 		}
 
-						if (resp.type === 'prof') {
-							this.images.profImg = resp.response.data.data.img;
-							this.images.profImgName = resp.response.data.data.filename;
-							continue;
-						}
-						this.images.backImg = resp.response.data.data.img;
-						this.images.backImgName = resp.response.data.data.filename;
-					}
-				});
+			// 		if (resp.type === 'prof') {
+			// 			this.images.profImg = resp.response.data.data.img;
+			// 			this.images.profImgName = resp.response.data.data.filename;
+			// 			continue;
+			// 		}
+			// 		this.images.backImg = resp.response.data.data.img;
+			// 		this.images.backImgName = resp.response.data.data.filename;
+			// 	}
+			// });
 		},
-		identifyInsertImage (userId) {
-			return new Promise(async (resolve, reject) => {
-				let array = [];
-				let error = false;
-				for (let index = 0; index < this.editImg.files.length; index += 1) {
-					const file = this.editImg.files[index];
-					let route = '';
-					let oldFileName = '';
-					let formData = new FormData();
+		async identifyInsertImage (userId) {
+			let array = [];
+			let error = false;
+			let route = '';
+			let oldFileName = '';
+			let formData = new FormData();
+			// for (let index = 0; index < this.editImg.files.length; index += 1) {
+			// 	const file = this.editImg.files[index];
 
-					if (file.img === '') {
-						continue;
+			// 	if (file.img === '') {
+			// 		continue;
+			// 	}
+
+			// 	if (file.type === 'back') {
+			// 		formData.append('image', file.img, file.img.name);
+			// 		oldFileName = this.images.backImgName;
+			// 		route = 'Profile/setBackImg';
+			// 	}
+
+			// 	if (file.type === 'prof') {
+			// 		formData.append('image', file.img, file.img.name);
+			// 		oldFileName = this.images.profImgName;
+			// 		route = 'Profile/setProfImg'
+			// 	}
+
+			// 	array.push(this.$axios
+			// 		.post('http://localhost:8081/' + route, formData, {
+			// 			headers: {
+			// 				token: this.token,
+			// 				path: userId,
+			// 				fileName: oldFileName
+			// 			}
+			// 		}));
+			// }
+			formData.append('image', this.editImg.files[0].img, this.editImg.files[0].img.name);
+			oldFileName = this.images.profImgName;
+			route = 'Profile/setProfImg'
+			console.log(formData.get('imageP'));
+			this.$axios
+				.post('http://localhost:8081/' + route, formData, {
+					headers: {
+						token: this.token,
+						path: userId,
+						fileName: oldFileName
 					}
+				})
+				.then((response) => {
+					// return response;
+				})
+			formData.delete('image');
 
-					if (file.type === 'back') {
-						formData.append('image', file.img, file.img.name);
-						oldFileName = this.images.backImgName;
-						route = 'Profile/setBackImg';
+			formData.append('image', this.editImg.files[1].img, this.editImg.files[1].img.name);
+			oldFileName = this.images.backImgName;
+			route = 'Profile/setBackImg'
+
+			this.$axios
+				.post('http://localhost:8081/' + route, formData, {
+					headers: {
+						token: this.token,
+						path: userId,
+						fileName: oldFileName
 					}
+				})
+				.then((response) => {
+					console.log('a', response);
+					// return response;
+				})
 
-					if (file.type === 'prof') {
-						formData.append('image', file.img, file.img.name);
-						oldFileName = this.images.profImgName;
-						route = 'Profile/setProfImg'
-					}
+			// if (error) {
+			// 	this.snackbar = true;
+			// 	this.snackbarColor = 'red';
+			// 	this.snackbarMessage = 'Houve um erro em alterar a imagem'
+			// }
 
-					const post = await this.$axios
-						.post('http://localhost:8081/' + route, formData, {
-							headers: {
-								token: this.token,
-								path: userId,
-								fileName: oldFileName
-							}
-						})
-						.then((response) => {
-							formData.delete('image');
-							if (response.data.error) {
-								error = true;
-							}
-							return response;
-						});
-
-					array.push({
-						type: file.type,
-						response: post
-					});
-				}
-				if (error) {
-					this.snackbar = true;
-					this.snackbarColor = 'red';
-					this.snackbarMessage = 'Houve um erro em alterar a imagem'
-					return resolve(array);
-				}
-
-				this.snackbar = 'dark'
-				this.snackbar = true;
-				this.snackbarMessage = 'Imagens Alteradas'
-				return resolve(array);
-			});
+			// this.snackbar = 'dark'
+			// this.snackbar = true;
+			// this.snackbarMessage = 'Imagens Alteradas'
 		},
 		pickFile (type) {
 			if (type === 'profImage') {

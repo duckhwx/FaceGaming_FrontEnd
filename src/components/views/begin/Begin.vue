@@ -57,7 +57,7 @@
 						size="35"
 						>
 							<v-img
-							:src="publication.FILE_NAME.userImg"
+							:src="publication.PROFILE_IMG"
 							></v-img>
 						</v-list-item-avatar>
 						<v-list-item-content>
@@ -71,13 +71,13 @@
 						<v-divider></v-divider>
 					<v-card-text class="text-md-left">{{publication.TITLE}}</v-card-text>
 					<v-layout
-					v-if="publication.FILES.length != 0"
+					v-if="publication.FILES.error = true"
 					justify-center
 					>
 						<v-container fluid>
 							<v-row dense>
 								<v-col class="imgCol d-inline-block"
-								v-for="file in publication.FILES"
+								v-for="file in publication.FILES.data"
 								:key="file.id"
 								:cols="file.FLEX">
 									<v-layout
@@ -226,6 +226,7 @@ export default {
 					headers: { token: this.token }
 				})
 				.then((response) => {
+					console.log(response);
 					if (response.error) {
 						this.pubsError = true;
 						this.pubsErrorMessage = response.data.message;
@@ -240,8 +241,8 @@ export default {
 
 					for (let index = 0; index < response.data.data.length; index += 1) {
 						const pub = response.data.data[index];
-						for (let index = 0; index < pub.FILES.length; index += 1) {
-							let file = pub.FILES[index];
+						for (let index = 0; index < pub.FILES.data.length; index += 1) {
+							let file = pub.FILES.data[index];
 
 							if (pub.FILES.length === 1) {
 								file.FLEX = 12;

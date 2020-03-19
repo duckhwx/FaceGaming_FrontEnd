@@ -121,6 +121,7 @@ export default {
 					if (response.data.error) {
 						return;
 					}
+					console.log(response);
 					const data = response.data;
 					this.username = data.USERNAME;
 
