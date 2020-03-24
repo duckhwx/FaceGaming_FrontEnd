@@ -1,48 +1,11 @@
 <template>
-<v-container>
-	<CreatePub></CreatePub>
-
-	<v-expand-x-transition>
-		<v-layout v-show="pubEdit" flex justify-center class="publications">
-			<v-flex xs12 sm7>
-				<v-card dark>
-					<v-card-title>Editar Publicação</v-card-title>
-					<v-divider></v-divider>
-
-					<v-form ref="edit">
-						<v-container>
-
-							<v-row>
-								<v-col>
-									<v-textarea v-model="dataText2"
-									class="textArea"
-									:rules="textRules"
-									counter
-									outlined
-									solo
-									no-resize
-									auto-grow
-									label="Texto">
-									</v-textarea>
-								</v-col>
-							</v-row>
-
-							<v-row>
-								<v-col class="text-left">
-										<v-btn
-										align="left"
-										class="d-inline"
-										@click="updatePub">Editar Dados</v-btn>
-								</v-col>
-							</v-row>
-
-						</v-container>
-
-					</v-form>
-				</v-card>
-			</v-flex>
-		</v-layout>
-	</v-expand-x-transition>
+	<v-container>
+		<CreatePub></CreatePub>
+		<UpdatePub
+		v-on:resetPubId="pubIdUpdate = 0"
+		v-on:resetTrigger="pubUpdateTrigger = false"
+		:pubId="pubIdUpdate"
+		:trigger="pubUpdateTrigger"></UpdatePub>
 
 		<v-layout class="publications"
 		flex
@@ -53,25 +16,37 @@
 				<v-card>
 					<v-list-item>
 						<v-list-item-avatar
+						color="grey darken-2"
 						class="mx-2 my-3"
 						size="35"
 						>
 							<v-img
+							v-if="publication.PROFILE_IMG !== ''"
 							:src="publication.PROFILE_IMG"
 							></v-img>
+							<v-icon
+							size="20"
+							v-else>
+								fas fa-user
+							</v-icon>
 						</v-list-item-avatar>
-						<v-list-item-content>
+
+						<v-list-item-action>
 							<v-list-item-title>
 								{{publication.USERNAME}}
 							</v-list-item-title>
-						</v-list-item-content>
-						<Edit2 v-on:pubEdit="editPub(publication.ID)"
-					v-if="userID === publication.USER_ID"></Edit2>
+						</v-list-item-action>
+
+						<v-spacer></v-spacer>
+						<OptionsButton
+						v-on:updatePub="updatePub"
+						:pubId="publication.ID"></OptionsButton>
+
 					</v-list-item>
 						<v-divider></v-divider>
 					<v-card-text class="text-md-left">{{publication.TITLE}}</v-card-text>
 					<v-layout
-					v-if="publication.FILES.error = true"
+					v-if="publication.FILES.data.length > 0"
 					justify-center
 					>
 						<v-container fluid>
@@ -80,21 +55,7 @@
 								v-for="file in publication.FILES.data"
 								:key="file.id"
 								:cols="file.FLEX">
-									<v-layout
-									class="mb-2"
-									v-if="file.error === true"
-									align-center
-									justify-center
-									column>
-										<v-icon
-										size="40">
-											fas fa-exclamation-triangle
-										</v-icon>
-										<div class="mt-3">{{file.message}}</div>
-									</v-layout>
-
 									<v-img
-										v-else
 										class="images align-end"
 										:src="file.FILE"
 										height="200"
@@ -103,6 +64,18 @@
 								</v-col>
 							</v-row>
 						</v-container>
+					</v-layout>
+					<v-layout
+					class="mb-2 pb-6 pt-3"
+					v-if="publication.FILES.error"
+					align-center
+					justify-center
+					column>
+						<v-icon
+						size="40">
+							fas fa-exclamation-triangle
+						</v-icon>
+						<div class="mt-3">Houve um erro ao coletar os arquivos</div>
 					</v-layout>
 				</v-card>
 			</v-flex>
@@ -164,26 +137,20 @@
 	</v-container>
 </template>
 <script>
-import Edit2 from '@/components/views/miscellaneous/edit2Button'
+import OptionsButton from '@/components/views/miscellaneous/OptionsButton'
 import CreatePublication from '@/components/views/begin/CreatePublication'
+import UpdatePublication from '@/components/views/begin/UpdatePublication'
 
 export default {
 	name: 'Begin',
 	components: {
-		Edit2: Edit2,
-		CreatePub: CreatePublication
+		OptionsButton: OptionsButton,
+		CreatePub: CreatePublication,
+		UpdatePub: UpdatePublication
 	},
 	data () {
 		return {
 			pubEditID: '',
-			userID: '',
-			dataText2: '',
-			file: [],
-			textRules: [
-				v => !!v || 'Texto requisitado',
-				v => v.length <= 500 || 'Máximo 500 caracteres'
-			],
-			pubEdit: false,
 			token: JSON.parse(localStorage.userData),
 			publications: [],
 			imgDialog: false,
@@ -194,11 +161,12 @@ export default {
 			selectFilesError: false,
 			selectFilesErrorMessage: '',
 			displayProgress: 'd-none',
-			verifyScroll: true
+			verifyScroll: true,
+			pubUpdateTrigger: false,
+			pubIdUpdate: 0
 		}
 	},
 	mounted () {
-		this.decodedID();
 		this.selectPubs();
 		window.onscroll = () => {
 			let bottomScroll = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
@@ -210,15 +178,6 @@ export default {
 		}
 	},
 	methods: {
-		editPub (pubID) {
-			if (this.pubEditID === pubID) {
-				this.pubEdit = !this.pubEdit
-				return
-			}
-			console.log(this.pubEditID)
-			this.pubEditID = pubID
-			this.pubEdit = true
-		},
 		selectPubs () {
 			this.displayProgress = '';
 			this.$axios
@@ -234,25 +193,25 @@ export default {
 						return;
 					}
 
-					if (response.data.data.length < 1) {
+					if (response.data.length < 1) {
 						this.displayProgress = 'd-none';
 						return;
 					}
 
-					for (let index = 0; index < response.data.data.length; index += 1) {
-						const pub = response.data.data[index];
+					for (let index = 0; index < response.data.length; index += 1) {
+						const pub = response.data[index];
 						for (let index = 0; index < pub.FILES.data.length; index += 1) {
 							let file = pub.FILES.data[index];
 
-							if (pub.FILES.length === 1) {
+							if (pub.FILES.data.length === 1) {
 								file.FLEX = 12;
 								continue;
 							}
 
-							if (pub.FILES.length === 3) {
-								pub.FILES[index].FLEX = 12;
-								pub.FILES[1].FLEX = 6;
-								pub.FILES[2].FLEX = 6;
+							if (pub.FILES.data.length === 3) {
+								pub.FILES.data[index].FLEX = 12;
+								pub.FILES.data[1].FLEX = 6;
+								pub.FILES.data[2].FLEX = 6;
 								continue;
 							}
 
@@ -261,41 +220,10 @@ export default {
 
 						this.publications.push(pub);
 					}
-
 					this.displayProgress = 'd-none';
 					this.start += 10;
 					this.verifyScroll = true;
-					console.log(this.start);
-					console.log(this.publications);
 				});
-		},
-		decodedID () {
-			const token = localStorage.userData;
-			const decoded = this.$jwt(token);
-			this.userID = decoded.userData.ID;
-		},
-		updatePub () {
-			if (this.$refs.edit.validate()) {
-				let userObject = {
-					pubId: this.pubEditID,
-					textfield: this.dataText2
-				}
-				this.$axios.post('http://localhost:8081/' + 'Publication/updatePub', userObject,
-					{headers: { token: JSON.parse(localStorage.userData) }})
-					.then((response) => {
-						if (response.data.status) {
-							this.snackbarColor = 'red'
-							this.message = response.data.message;
-							this.createPubMessage = true;
-							return;
-						}
-
-						this.message = response.data.message;
-						this.createPubMessage = true;
-						this.pubEdit = false;
-						this.selectPubs();
-					})
-			}
 		},
 		openDialogImg (pubId) {
 			for (let index = 0; index < this.publications.length; index += 1) {
@@ -305,6 +233,10 @@ export default {
 				}
 			}
 			this.imgDialog = true;
+		},
+		updatePub (id) {
+			this.pubIdUpdate = id;
+			this.pubUpdateTrigger = true;
 		}
 	}
 };

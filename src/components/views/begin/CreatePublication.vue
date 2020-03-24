@@ -4,94 +4,94 @@
             <v-layout v-show="pubExpand" flex justify-center class="publications">
             <v-flex xs12 sm7>
                 <v-card dark>
-                <v-card-title>Criar Publicação</v-card-title>
+					<v-card-title>Criar Publicação</v-card-title>
                 <v-divider></v-divider>
 
                 <v-form ref="pubForm">
                     <v-container>
-                    <v-row>
-                        <v-col>
-                        <v-textarea
-                            v-model="dataText"
-                            class="textArea"
-                            :rules="textRules"
-                            counter
-                            outlined
-                            solo
-                            no-resize
-                            auto-grow
-                            label="Texto"
-                        ></v-textarea>
-                        </v-col>
-                    </v-row>
+						<v-row>
+							<v-col>
+							<v-textarea
+								v-model="dataText"
+								class="textArea"
+								:rules="textRules"
+								counter
+								outlined
+								solo
+								no-resize
+								auto-grow
+								label="Texto"
+							></v-textarea>
+							</v-col>
+						</v-row>
 
-                    <v-row v-if="files.length > 0">
-                        <v-col>
-                        <v-card class="py-2" elevation>
-                            <v-layout justify-center>
-                            <v-flex
-                                xs6
-                                md12
-                                lg12
-                                v-for="(file, index) in files"
-                                :key="index"
-                                class="text-right px-2"
-                            >
-                                <v-layout justify-center>
-                                <v-img :src="filesImg[index]" height="70" width="50">
-                                    <v-btn
-                                    class="mx-1"
-                                    width="26"
-                                    height="26"
-                                    small
-                                    fab
-                                    top
-                                    @click="reduceFile(index)"
-                                    >
-                                    <v-icon size="14">fas fa-times</v-icon>
-                                    </v-btn>
-                                </v-img>
-                                </v-layout>
-                            </v-flex>
-                            </v-layout>
-                        </v-card>
-                        </v-col>
-                    </v-row>
+						<v-row v-if="files.length > 0">
+							<v-col>
+								<v-card class="py-2" elevation>
+									<v-layout justify-center>
+										<v-flex
+											xs6
+											md12
+											lg12
+											v-for="(file, index) in files"
+											:key="index"
+											class="text-right px-2"
+										>
+											<v-layout justify-center>
+												<v-img :src="filesImg[index]" height="70" width="50">
+													<v-btn
+													class="mx-1"
+													width="26"
+													height="26"
+													small
+													fab
+													top
+													@click="reduceFile(index)"
+													>
+													<v-icon size="14">fas fa-times</v-icon>
+													</v-btn>
+												</v-img>
+											</v-layout>
+										</v-flex>
+									</v-layout>
+								</v-card>
+							</v-col>
+						</v-row>
 
-                    <span class="error--text caption" v-if="fileError">{{fileErrorMessage}}</span>
+						<span class="error--text caption" v-if="fileError">{{fileErrorMessage}}</span>
 
-                    <v-row>
-                        <v-col class="text-left">
-                        <v-btn align="left" class="d-inline" @click="insertPub">Publicar</v-btn>
-                        </v-col>
+						<v-row>
+							<v-col class="text-left">
+								<v-btn align="left" class="d-inline" @click="insertPub">Publicar</v-btn>
+							</v-col>
 
-                        <v-col class="text-right">
-                        <input
-                            type="file"
-                            ref="image"
-                            style="display: none"
-                            name="file"
-                            @change="filePicked"
-                            multiple
-                        >
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                            <v-btn
-                                class="d-inline addFileButton"
-                                align="right"
-                                right
-                                small
-                                fab
-                                v-on="on"
-                                @click="pickFile"
-                            >
-                                <v-icon small>fas fa-image</v-icon>
-                            </v-btn>
-                            </template>
-                            <span>Adicionar Imagem</span>
-                        </v-tooltip>
-                        </v-col>
-                    </v-row>
+							<v-col class="text-right">
+								<input
+									type="file"
+									ref="image"
+									style="display: none"
+									name="file"
+									@change="filePicked"
+									multiple
+								>
+								<v-tooltip bottom>
+									<template v-slot:activator="{ on }">
+									<v-btn
+										class="d-inline addFileButton"
+										align="right"
+										right
+										small
+										fab
+										v-on="on"
+										@click="pickFile"
+									>
+										<v-icon small>fas fa-image</v-icon>
+									</v-btn>
+									</template>
+									<span>Adicionar Imagem</span>
+								</v-tooltip>
+							</v-col>
+						</v-row>
                     </v-container>
                 </v-form>
                 </v-card>

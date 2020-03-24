@@ -18,7 +18,7 @@
 
 <script>
 export default {
-	name: 'createBtn',
+	name: 'CreateBtn',
 	methods: {
 		createPubTrigger () {
 			this.$emit('pubTrigger');

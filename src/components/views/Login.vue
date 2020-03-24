@@ -17,7 +17,10 @@
 					:right="true"
 					:top="true">{{message}}</v-snackbar>
 
-					<v-form ref="formulario" autocomplete="new-password">
+					<v-form
+					ref="formulario"
+					autocomplete="new-password"
+					@keyup.enter="getLogin">
 						<v-container>
 							<v-row>
 								<v-col cols="11" class="mx-auto">
@@ -39,7 +42,8 @@
 									required
 									></v-text-field>
 
-									<v-btn @click="getLogin">Logar</v-btn>
+									<v-btn
+									@click="getLogin">Logar</v-btn>
 								</v-col>
 							</v-row>
 						</v-container>

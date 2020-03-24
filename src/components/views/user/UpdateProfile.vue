@@ -176,7 +176,7 @@ export default {
 			this.dialogTrigger = this.editProfDialog;
 		},
 		dialogTrigger () {
-			if (this.dialogTrigger === false) {
+			if (!this.dialogTrigger) {
 				this.$emit('changeDialogStatus')
 			}
 		}
@@ -207,8 +207,8 @@ export default {
 			// });
 		},
 		async identifyInsertImage (userId) {
-			let array = [];
-			let error = false;
+			// let array = [];
+			// let error = false;
 			let route = '';
 			let oldFileName = '';
 			let formData = new FormData();

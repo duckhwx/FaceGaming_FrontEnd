@@ -1,6 +1,5 @@
 <template>
 	<v-container grid-list-xl>
-		<Edit v-on:disableButton="Desativar"></Edit>
 		<v-layout row align-center justify-center class="margin-t50 margin-b50">
 			<v-flex xs12 md8>
 				<v-form ref="formulario">
@@ -99,11 +98,7 @@
 </template>
 
 <script>
-import Edit from '@/components/views/miscellaneous/editButton'
 export default {
-	components: {
-		Edit: Edit
-	},
 	data () {
 		return {
 			user: '',
