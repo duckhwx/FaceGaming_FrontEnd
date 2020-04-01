@@ -39,9 +39,6 @@ export default {
 	},
 	methods: {
 		updatePub (id) {
-			this.$vuetify.goTo(0, {
-				duration: 500
-			});
 			this.$emit('updatePub', id);
 		},
 		deletePub () {

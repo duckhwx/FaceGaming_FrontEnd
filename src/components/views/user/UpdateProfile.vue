@@ -120,15 +120,6 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
-
-        <v-snackbar
-        class="mt-7"
-        v-model="snackbar"
-        :color="snackbarColor"
-        right
-        top>
-        {{snackbarMessage}}
-        </v-snackbar>
     </div>
 </template>
 <script>
@@ -145,30 +136,16 @@ export default {
 		editImgPreview: {
 			type: Object,
 			required: true
-		},
-		token: {
-			type: String,
-			required: true
 		}
 	},
 	data () {
 		return {
 			dialogTrigger: false,
 			editImg: {
-				files: [
-					{
-						type: 'prof',
-						img: ''
-					},
-					{
-						type: 'back',
-						img: ''
-					}
-				]
+				profile: '',
+				background: ''
 			},
-			snackbar: false,
-			snackbarColor: '',
-			snackbarMessage: ''
+			token: JSON.parse(localStorage.userData)
 		}
 	},
 	watch: {
@@ -185,104 +162,103 @@ export default {
 		insertImages () {
 			const decoded = this.$jwt(this.token);
 			const userId = decoded.userData.ID;
+			let error = false;
 
-			console.log(this.images);
-			this.identifyInsertImage(userId)
-			// .then((response) => {
-			// 	for (let index = 0; index < response.length; index++) {
-			// 		let resp = response[index];
+			if (this.editImg.profile === '' && this.editImg.background === '') {
+				this.$emit('callSnackbar', {
+					trigger: true,
+					color: 'red',
+					message: 'Insira uma imagem'
+				});
+				return;
+			}
 
-			// 		if (resp.response.data.error) {
-			// 			continue;
-			// 		}
+			this.insertProfileImg(this.editImg.profile, userId)
+				.then((respProf) => {
+					this.editImg.profile = '';
 
-			// 		if (resp.type === 'prof') {
-			// 			this.images.profImg = resp.response.data.data.img;
-			// 			this.images.profImgName = resp.response.data.data.filename;
-			// 			continue;
-			// 		}
-			// 		this.images.backImg = resp.response.data.data.img;
-			// 		this.images.backImgName = resp.response.data.data.filename;
-			// 	}
-			// });
+					this.insertBackgroundImg(this.editImg.background, userId)
+						.then((respBack) => {
+							this.editImg.background = '';
+							this.$emit('callSnackbar', {
+								trigger: true,
+								color: 'dark',
+								message: 'Imagens atualizadas com sucesso'
+							});
+							this.$emit('selectProfImages');
+							this.dialogTrigger = false;
+						})
+						.catch((responseErr) => {
+							error = true;
+						})
+				})
+				.catch((responseErr) => {
+					error = true;
+				});
+
+			if (error) {
+				this.$emit('callSnackbar', {
+					trigger: true,
+					color: 'red',
+					message: 'Houve um erro ao atualizar as imagens de Perfil/Capa'
+				});
+			}
 		},
-		async identifyInsertImage (userId) {
-			// let array = [];
-			// let error = false;
-			let route = '';
-			let oldFileName = '';
-			let formData = new FormData();
-			// for (let index = 0; index < this.editImg.files.length; index += 1) {
-			// 	const file = this.editImg.files[index];
+		insertProfileImg (file, userId) {
+			return new Promise((resolve, reject) => {
+				if (file === '') {
+					resolve('');
+				}
 
-			// 	if (file.img === '') {
-			// 		continue;
-			// 	}
+				let formData = new FormData();
+				const oldFileName = this.images.profImgName;
 
-			// 	if (file.type === 'back') {
-			// 		formData.append('image', file.img, file.img.name);
-			// 		oldFileName = this.images.backImgName;
-			// 		route = 'Profile/setBackImg';
-			// 	}
+				formData.append('image', file, file.name);
 
-			// 	if (file.type === 'prof') {
-			// 		formData.append('image', file.img, file.img.name);
-			// 		oldFileName = this.images.profImgName;
-			// 		route = 'Profile/setProfImg'
-			// 	}
+				this.$axios
+					.post('http://localhost:8081/' + 'Profile/setProfImg', formData, {
+						headers: {
+							token: this.token,
+							path: userId,
+							fileName: oldFileName
+						}
+					})
+					.then((response) => {
+						if (response.data.error) {
+							reject(response);
+						}
 
-			// 	array.push(this.$axios
-			// 		.post('http://localhost:8081/' + route, formData, {
-			// 			headers: {
-			// 				token: this.token,
-			// 				path: userId,
-			// 				fileName: oldFileName
-			// 			}
-			// 		}));
-			// }
-			formData.append('image', this.editImg.files[0].img, this.editImg.files[0].img.name);
-			oldFileName = this.images.profImgName;
-			route = 'Profile/setProfImg'
-			console.log(formData.get('imageP'));
-			this.$axios
-				.post('http://localhost:8081/' + route, formData, {
-					headers: {
-						token: this.token,
-						path: userId,
-						fileName: oldFileName
-					}
-				})
-				.then((response) => {
-					// return response;
-				})
-			formData.delete('image');
+						resolve(response);
+					});
+			});
+		},
+		insertBackgroundImg (file, userId) {
+			return new Promise((resolve, reject) => {
+				if (file === '') {
+					resolve('');
+				}
 
-			formData.append('image', this.editImg.files[1].img, this.editImg.files[1].img.name);
-			oldFileName = this.images.backImgName;
-			route = 'Profile/setBackImg'
+				let formData = new FormData();
+				const oldFileName = this.images.backImgName;
 
-			this.$axios
-				.post('http://localhost:8081/' + route, formData, {
-					headers: {
-						token: this.token,
-						path: userId,
-						fileName: oldFileName
-					}
-				})
-				.then((response) => {
-					console.log('a', response);
-					// return response;
-				})
+				formData.append('image', file, file.name);
 
-			// if (error) {
-			// 	this.snackbar = true;
-			// 	this.snackbarColor = 'red';
-			// 	this.snackbarMessage = 'Houve um erro em alterar a imagem'
-			// }
+				this.$axios
+					.post('http://localhost:8081/' + 'Profile/setBackImg', formData, {
+						headers: {
+							token: this.token,
+							path: userId,
+							fileName: oldFileName
+						}
+					})
+					.then((response) => {
+						if (response.data.error) {
+							reject(response);
+						}
 
-			// this.snackbar = 'dark'
-			// this.snackbar = true;
-			// this.snackbarMessage = 'Imagens Alteradas'
+						resolve(response);
+					});
+			});
 		},
 		pickFile (type) {
 			if (type === 'profImage') {
@@ -302,23 +278,29 @@ export default {
 			let fileType = file.type.split('/').pop();
 
 			if (file.name.lastIndexOf('.') <= 0) {
-				this.snackbar = true;
-				this.snackbarColor = 'error';
-				this.snackbarMessage = 'Arquivo Invalido';
+				this.$emit('callSnackbar', {
+					trigger: true,
+					color: 'red',
+					message: 'Arquivo Invalido'
+				});
 				return;
 			}
 
 			if (!fileTypes.includes(fileType)) {
-				this.snackbar = true;
-				this.snackbarColor = 'error';
-				this.snackbarMessage = 'Formato invalido, apenas permitido (.jpg, .gif, .png)';
+				this.$emit('callSnackbar', {
+					trigger: true,
+					color: 'red',
+					message: 'Formato invalido, apenas permitido (.jpg, .gif, .png)'
+				});
 				return;
 			}
 
 			if (file.size > 1000000) {
-				this.snackbar = true;
-				this.snackbarColor = 'error';
-				this.snackbarMessage = 'Tamanho maior que 10 MB';
+				this.$emit('callSnackbar', {
+					trigger: true,
+					color: 'red',
+					message: 'Tamanho maior que 10 MB'
+				});
 				return;
 			}
 
@@ -335,17 +317,11 @@ export default {
 			fileReader.readAsDataURL(file)
 
 			if (event.target.name === 'profImage') {
-				this.editImg.files[0] = {
-					type: 'prof',
-					img: file
-				};
+				this.editImg.profile = file;
 				return;
 			}
 
-			this.editImg.files[1] = {
-				type: 'back',
-				img: file
-			};
+			this.editImg.background = file;
 		}
 	}
 }

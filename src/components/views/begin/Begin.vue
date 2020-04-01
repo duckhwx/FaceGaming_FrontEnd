@@ -1,11 +1,14 @@
 <template>
 	<v-container>
-		<CreatePub></CreatePub>
+		<CreatePub
+		@callSnackbar="callSnackbar"></CreatePub>
+
 		<UpdatePub
 		v-on:resetPubId="pubIdUpdate = 0"
 		v-on:resetTrigger="pubUpdateTrigger = false"
-		:pubId="pubIdUpdate"
-		:trigger="pubUpdateTrigger"></UpdatePub>
+		@resetBegin="resetBegin"
+		@callSnackbar="callSnackbar"
+		:pubUpdData="pubUpdData"></UpdatePub>
 
 		<v-layout class="publications"
 		flex
@@ -88,45 +91,6 @@
 		{{pubsErrorMessage}}
 		</div>
 
-		<v-snackbar
-		class="snackbar"
-		v-model="selectFilesError"
-		color="error"
-		top
-		right
-		>
-		{{selectFilesErrorMessage}}
-		</v-snackbar>
-
-		<v-dialog
-		v-model="imgDialog"
-		width="80%"
-		>
-			<v-carousel
-			show-arrows
-			prev-icon="fas fa-chevron-left"
-			next-icon="fas fa-chevron-right"
-			>
-				<v-carousel-item
-				v-for="(imagePub, index) in imagesPub"
-				:key="index"
-				>
-					<v-sheet
-					color="grey darken-4"
-					height="100%"
-					tile
-					>
-						<v-img
-						:src="imagePub.FILE"
-						width="100%"
-						height="100%"
-						contain>
-						</v-img>
-					</v-sheet>
-				</v-carousel-item>
-			</v-carousel>
-		</v-dialog>
-
 		<v-progress-circular
 		:class="displayProgress"
 		indeterminate
@@ -134,36 +98,51 @@
 		color="white"
 		size="40">
 		</v-progress-circular>
+
+		<PubDialog
+		@resetDialog="resetDialog"
+		:dialogFiles="dialogFiles"></PubDialog>
 	</v-container>
 </template>
 <script>
 import OptionsButton from '@/components/views/miscellaneous/OptionsButton'
 import CreatePublication from '@/components/views/begin/CreatePublication'
 import UpdatePublication from '@/components/views/begin/UpdatePublication'
+import PubDialog from '@/components/views/begin/DialogPub';
 
 export default {
 	name: 'Begin',
 	components: {
 		OptionsButton: OptionsButton,
 		CreatePub: CreatePublication,
-		UpdatePub: UpdatePublication
+		UpdatePub: UpdatePublication,
+		PubDialog: PubDialog
 	},
 	data () {
 		return {
-			pubEditID: '',
 			token: JSON.parse(localStorage.userData),
+			// Publications
 			publications: [],
-			imgDialog: false,
-			imagesPub: [],
 			start: 0,
 			pubsError: false,
 			pubsErrorMessage: '',
-			selectFilesError: false,
-			selectFilesErrorMessage: '',
+			// Scroll
 			displayProgress: 'd-none',
 			verifyScroll: true,
-			pubUpdateTrigger: false,
-			pubIdUpdate: 0
+			// Dialog Publication
+			dialogFiles: {
+				trigger: false,
+				images: []
+			},
+			// Update Publication
+			pubUpdData: {
+				trigger: false,
+				pubId: 0
+			},
+			// Snackbar
+			snackbarTrigger: false,
+			snackbarColor: '',
+			snackbarMessage: ''
 		}
 	},
 	mounted () {
@@ -186,14 +165,14 @@ export default {
 				})
 				.then((response) => {
 					console.log(response);
-					if (response.error) {
+					if (response.data.error && this.start === 0) {
 						this.pubsError = true;
 						this.pubsErrorMessage = response.data.message;
 						this.displayProgress = 'd-none';
 						return;
 					}
 
-					if (response.data.length < 1) {
+					if (response.data.error) {
 						this.displayProgress = 'd-none';
 						return;
 					}
@@ -217,7 +196,6 @@ export default {
 
 							file.FLEX = 6;
 						}
-
 						this.publications.push(pub);
 					}
 					this.displayProgress = 'd-none';
@@ -226,17 +204,48 @@ export default {
 				});
 		},
 		openDialogImg (pubId) {
+			let imgs = []
 			for (let index = 0; index < this.publications.length; index += 1) {
 				let publication = this.publications[index];
 				if (publication.ID === pubId) {
-					this.imagesPub = publication.FILES;
+					imgs = publication.FILES;
+					break;
 				}
 			}
-			this.imgDialog = true;
+			this.dialogFiles = {
+				trigger: true,
+				images: imgs
+			}
+		},
+		resetDialog () {
+			this.dialogFiles = {
+				trigger: false,
+				images: []
+			}
 		},
 		updatePub (id) {
-			this.pubIdUpdate = id;
-			this.pubUpdateTrigger = true;
+			this.pubUpdData = {
+				trigger: true,
+				pubId: id
+			}
+		},
+		callSnackbar (presets) {
+			this.$emit('callSnackbar', presets);
+		},
+		summonSnackbar (color, message) {
+			this.snackbarTrigger = true;
+			this.snackbarColor = color;
+			this.snackbarMessage = message;
+		},
+		resetSnackbar () {
+			this.snackbarTrigger = false;
+			this.snackbarColor = '';
+			this.snackbarMessage = '';
+		},
+		resetBegin () {
+			this.start = 0;
+			this.publications = [];
+			this.selectPubs();
 		}
 	}
 };
@@ -244,9 +253,6 @@ export default {
 <style>
 	.publications{
 		margin-top: 30px
-	}
-	.snackbar{
-		margin-top: 45px
 	}
 	.images{
 		margin-top: -7px;

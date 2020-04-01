@@ -1,5 +1,5 @@
 <template>
-<v-container class="zap">
+<v-container>
 	<v-layout
     class="mt-4"
     flex
@@ -77,11 +77,12 @@
     </v-btn>
 
     <updateProfile
+    @selectProfImages="getProfileData()"
+    @callSnackbar="callSnackbar"
     v-on:changeDialogStatus="editProfDialog = false"
     :editProfDialog="editProfDialog"
     :images="images"
-    :editImgPreview="editImgPreview"
-    :token="token"></updateProfile>
+    :editImgPreview="editImgPreview"></updateProfile>
 </v-container>
 </template>
 <script>
@@ -118,10 +119,10 @@ export default {
 					headers: { token: this.token }
 				})
 				.then((response) => {
+					console.log(response);
 					if (response.data.error) {
 						return;
 					}
-					console.log(response);
 					const data = response.data;
 					this.username = data.USERNAME;
 
@@ -132,6 +133,9 @@ export default {
 					this.editImgPreview.profImg = data.PROF_IMG;
 					this.editImgPreview.backImg = data.BACK_IMG;
 				});
+		},
+		callSnackbar (presets) {
+			this.$emit('callSnackbar', presets);
 		}
 	}
 }

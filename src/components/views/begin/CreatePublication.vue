@@ -100,14 +100,6 @@
         </v-expand-transition>
 
         <CreateBtn v-on:pubTrigger="createPub"></CreateBtn>
-
-        <v-snackbar class="snackbar"
-            v-model="createPubMessage"
-            :color="snackbarColor"
-            right
-            top
-            >{{message}}
-        </v-snackbar>
     </div>
 
 </template>
@@ -130,10 +122,7 @@ export default {
 			files: [],
 			filesImg: [],
 			fileError: false,
-			fileErrorMessage: '',
-			snackbarColor: 'dark',
-			createPubMessage: '',
-			message: ''
+			fileErrorMessage: ''
 		}
 	},
 	mounted () {
@@ -154,9 +143,11 @@ export default {
 					})
 					.then((response) => {
 						if (response.data.error) {
-							this.snackbarColor = 'red'
-							this.message = response.data.message;
-							this.createPubMessage = true;
+							this.$emit('callSnackbar', {
+								trigger: true,
+								color: 'red',
+								message: response.data.message
+							});
 							return
 						}
 
@@ -165,13 +156,15 @@ export default {
 							return;
 						}
 
-						this.message = response.data.message;
-						this.createPubMessage = true;
+						this.$emit('callSnackbar', {
+							trigger: true,
+							color: 'dark',
+							message: response.data.message
+						});
 						this.$refs.pubForm.reset();
 						this.dataText = '';
 						this.pubExpand = false;
 					});
-				this.snackbarColor = 'dark'
 			}
 		},
 		uploadFile (path) {
@@ -190,14 +183,19 @@ export default {
 				})
 				.then((response) => {
 					if (response.data.status) {
-						this.snackbarColor = 'red'
-						this.message = response.data.message;
-						this.createPubMessage = true;
+						this.$emit('callSnackbar', {
+							trigger: true,
+							color: 'red',
+							message: response.data.message
+						});
 						return;
 					}
 
-					this.message = response.data.message;
-					this.createPubMessage = true;
+					this.$emit('callSnackbar', {
+						trigger: true,
+						color: 'dark',
+						message: response.data.message
+					});
 					this.pubExpand = false;
 					this.files = [];
 					this.filesImg = [];

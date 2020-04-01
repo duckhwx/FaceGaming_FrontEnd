@@ -49,7 +49,7 @@
                                                 class="text-right px-2"
                                             >
                                                 <v-layout justify-center>
-                                                    <v-img :src="img" height="70" width="50">
+                                                    <v-img :src="img.bs64File" height="70" width="50">
                                                         <v-btn
                                                         class="mx-1"
                                                         width="26"
@@ -115,11 +115,8 @@
 <script>
 export default {
 	props: {
-		pubId: {
-			type: Number
-		},
-		trigger: {
-			type: Boolean,
+		pubUpdData: {
+			type: Object,
 			required: true
 		}
 	},
@@ -127,6 +124,10 @@ export default {
 		return {
 			dataText: '',
 			files: [],
+			filesManagement: {
+				backEndFiles: [],
+				deletedFiles: []
+			},
 			imgsPreview: [],
 			fileError: false,
 			textRules: [
@@ -144,26 +145,52 @@ export default {
 					headers: { token: this.token }
 				})
 				.then((response) => {
-					if (response.error) {
-						console.log('deu bret');
-					}
 					console.log(response);
-					this.dataText = response.data.TITLE;
-					for (let index = 0; index < response.data.files.length; index++) {
-						let fileIndex = response.data.files[index];
-						let file = new File([fileIndex.BS64FILE], fileIndex.FILE_NAME, {
-							type: fileIndex.FILE_TYPE,
-							lastModified: new Date()
+					if (response.data.error.status && response.data.error.type === 'text') {
+						this.$emit('callSnackbar', {
+							trigger: true,
+							color: 'red',
+							message: 'Houve um erro ao coletar os dados da publicação'
 						});
-						this.files.push(file);
-						this.imgsPreview.push(fileIndex.BS64FILE);
+						return;
 					}
+
+					this.dataText = response.data.data.TITLE;
+
+					if (response.data.error.status && response.data.error.type === 'files') {
+						this.$emit('callSnackbar', {
+							trigger: true,
+							color: 'red',
+							message: 'Houve um erro ao coletar os arquivos da publicação'
+						});
+						return;
+					}
+
+					if (response.data.data.files) {
+						for (let index = 0; index < response.data.data.files.length; index += 1) {
+							const fileIndex = response.data.data.files[index];
+							this.filesManagement.backEndFiles.push({
+								id: fileIndex.ID,
+								name: fileIndex.FILE_NAME
+							});
+
+							this.imgsPreview.push({
+								name: fileIndex.FILE_NAME,
+								bs64File: fileIndex.BS64FILE
+							});
+						}
+					}
+
+					this.$vuetify.goTo(0, {
+						duration: 500
+					});
+					this.pubExpand = true;
 				});
 		},
 		updatePub () {
 			if (this.$refs.pubForm.validate()) {
 				const pubObject = {
-					pubId: this.pubId,
+					pubId: this.pubUpdData.pubId,
 					textfield: this.dataText
 				};
 				let formData = new FormData();
@@ -171,44 +198,65 @@ export default {
 				this.$axios
 					.post('http://localhost:8081/' + 'Publication/updatePubText', pubObject, {
 						headers: {
-							token: this.token
+							token: this.token,
+							path: this.pubUpdData.pubId
 						}
 					})
 					.then((response) => {
 						if (response.data.error) {
-							console.log('Error updatePubText');
+							this.$emit('callSnackbar', {
+								trigger: true,
+								color: 'red',
+								message: 'Houve um erro ao atualizar a publicação'
+							});
 							return;
 						}
 
-						if (this.files.length > 0) {
-							for (let index = 0; index < this.files.length; index += 1) {
-								let file = this.files[index];
-								formData.append('images', file, file.filename);
-							}
+						const filesObject = {
+							pubId: this.pubUpdData.pubId,
+							deletedFiles: this.filesManagement.deletedFiles
+						}
+
+						if (this.filesManagement.deletedFiles.length > 0) {
+							this.$axios
+								.post('http://localhost:8081/' + 'Publication/deleteFilesFromPubs', filesObject, {
+									headers: {
+										token: this.token,
+										path: this.pubUpdData.pubId
+									}
+								});
+						}
+
+						for (let index = 0; index < this.files.length; index += 1) {
+							let file = this.files[index];
+							formData.append('images', file, file.filename);
 						}
 
 						this.$axios
 							.post('http://localhost:8081/' + 'Publication/updatePubFiles', formData, {
 								headers: {
 									token: this.token,
-									path: this.pubId
+									path: this.pubUpdData.pubId
 								}
 							})
 							.then((response) => {
-								console.log(response);
-								// if (response.data.status) {
-								// 	this.snackbarColor = 'red'
-								// 	this.message = response.data.message;
-								// 	this.createPubMessage = true;
-								// 	return;
-								// }
-
-								// this.message = response.data.message;
-								// this.createPubMessage = true;
-								// this.pubEdit = false;
+								if (response.data.status) {
+									this.$emit('callSnackbar', {
+										trigger: true,
+										color: 'red',
+										message: 'Houve um erro ao atualizar os arquivos'
+									});
+								}
 							})
 
-						console.log('done');
+						this.resetData();
+						this.pubExpand = false;
+						this.$emit('callSnackbar', {
+							trigger: true,
+							color: 'dark',
+							message: 'Publicação atualizada'
+						});
+						this.$emit('resetBegin');
 					});
 			}
 		},
@@ -222,7 +270,6 @@ export default {
 		},
 		filePicked (event) {
 			const eventFiles = event.target.files;
-			console.log(eventFiles.length);
 			if (eventFiles.length > 4 || this.files.length + eventFiles.length > 4) {
 				this.fileError = true;
 				this.fileErrorMessage = 'Máximo 4 Arquivos';
@@ -242,7 +289,10 @@ export default {
 
 				let fileReader = new FileReader();
 				fileReader.addEventListener('load', () => {
-					this.imgsPreview.push(fileReader.result);
+					this.imgsPreview.push({
+						name: eventFiles[index].name,
+						bs64File: fileReader.result
+					});
 				});
 				fileReader.readAsDataURL(eventFiles[index])
 
@@ -251,33 +301,49 @@ export default {
 			}
 		},
 		closeUpdPub () {
-			this.dataText = '';
-			this.files = [];
+			this.resetData();
 			this.pubExpand = false;
 			this.$emit('resetTrigger');
 			this.$emit('resetPubId');
-			console.log(this.pubId);
 		},
-		reduceFile (index) {
+		resetData () {
+			this.dataText = '';
+			this.files = [];
+			this.imgsPreview = [];
+			this.filesManagement = {
+				backEndFiles: [],
+				deletedFiles: []
+			};
+			this.filesManagement = {
+				backEndFiles: [],
+				deletedFiles: []
+			}
+		},
+		reduceFile (indexArray) {
+			for (let index = 0; index < this.filesManagement.backEndFiles.length; index += 1) {
+				const file = this.filesManagement.backEndFiles[index];
+				if (file.name === this.imgsPreview[indexArray].name) {
+					this.filesManagement.deletedFiles.push(file);
+					break;
+				}
+			}
+
 			this.fileError = false;
 			this.fileErrorMessage = '';
-			this.files.splice(index, 1);
-			this.imgsPreview.splice(index, 1);
+			this.files.splice(indexArray, 1);
+			this.imgsPreview.splice(indexArray, 1);
 		}
 	},
 	watch: {
-		trigger () {
-			if (this.trigger) {
-				this.pubExpand = this.trigger;
+		pubUpdData () {
+			if (this.pubUpdData.trigger) {
+				this.getPubData(this.pubUpdData.pubId);
 			}
 		},
 		pubExpand () {
 			if (!this.pubExpand) {
 				this.$emit('changeUpdTrigger');
 			}
-		},
-		pubId () {
-			this.getPubData(this.pubId);
 		}
 	}
 }
