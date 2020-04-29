@@ -12,7 +12,7 @@ import JwtDecode from 'jwt-decode'
 Vue.config.productionTip = false
 Vue.prototype.$axios = Axios;
 Vue.prototype.$jwt = JwtDecode;
-Vue.use(Vuetify)
+Vue.use(Vuetify);
 
 /* eslint-disable no-new */
 new Vue({

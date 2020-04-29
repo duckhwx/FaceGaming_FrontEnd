@@ -7,7 +7,7 @@ import Home from '@/components/HomeView'
 import Begin from '@/components/views/begin/Begin'
 import Profile from '@/components/views/user/Profile'
 import EditProfile from '@/components/views/dashboards/EditProfile'
-import Friends from '@/components/views/dashboards/Friends'
+import Friends from '@/components/views/friends/Friends'
 
 Vue.use(Router)
 

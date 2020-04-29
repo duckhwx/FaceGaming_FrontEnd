@@ -12,14 +12,6 @@
             <v-toolbar-title>FaceGaming</v-toolbar-title>
             <v-spacer></v-spacer>
 
-                <v-col cols="3">
-                    <v-text-field
-                    hide-details
-                    :append-icon="serchIcon">
-
-                    </v-text-field>
-                </v-col>
-
             <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                     <v-app-bar-nav-icon v-on="on"
@@ -122,6 +114,6 @@ export default {
     }
 
     .navDivider{
-        margin-bottom: 5%;
+        margin-bottom: 6%;
     }
 </style>

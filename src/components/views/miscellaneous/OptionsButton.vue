@@ -1,48 +1,106 @@
 <template>
-	<v-menu bottom left offset-y>
-		<template v-slot:activator="{ on }">
-			<v-btn
-			icon
-			v-on="on"
+	<div>
+		<v-menu bottom left offset-y>
+			<template v-slot:activator="{ on }">
+				<v-btn
+				icon
+				v-on="on"
+				>
+					<v-icon>
+						fas fa-ellipsis-v
+					</v-icon>
+				</v-btn>
+			</template>
+			<v-list
+			width="120"
 			>
-				<v-icon>
-					fas fa-ellipsis-v
-				</v-icon>
-			</v-btn>
-		</template>
-		<v-list
-		width="120"
-		>
-			<v-list-item
-			@click="updatePub(pubId)">
-				<v-list-item-title>
-					Editar
-				</v-list-item-title>
-			</v-list-item>
-			<v-list-item
-			@click="deletePub(pubId)">
-				<v-list-item-title>
-					Excluir
-				</v-list-item-title>
-			</v-list-item>
-		</v-list>
-	</v-menu>
+				<v-list-item
+				@click="updatePub(pubId, index)">
+					<v-list-item-title>
+						Editar
+					</v-list-item-title>
+				</v-list-item>
+				<v-list-item
+				@click="summonDialogToDelete(pubId)">
+					<v-list-item-title>
+						Excluir
+					</v-list-item-title>
+				</v-list-item>
+			</v-list>
+		</v-menu>
+		<DialogModal
+		@action="deletePub"
+		@closeModal="closeModal"
+		:dialogData="dialogData"></DialogModal>
+	</div>
 </template>
 
 <script>
+import DialogModal from '@/components/views/miscellaneous/DialogModal';
 export default {
+	components: {
+		DialogModal: DialogModal
+	},
 	props: {
 		pubId: {
 			type: Number,
 			required: true
+		},
+		index: {
+			type: Number,
+			required: true
+		}
+	},
+	data () {
+		return {
+			dialogData: {
+				trigger: false,
+				message: ''
+			}
 		}
 	},
 	methods: {
-		updatePub (id) {
-			this.$emit('updatePub', id);
+		updatePub (id, index) {
+			this.$emit('updatePub', id, index);
+		},
+		summonDialogToDelete () {
+			this.dialogData = {
+				trigger: true,
+				message: 'Tens certeza de que deseja excluir esta publicação ?'
+			}
 		},
 		deletePub () {
-			this.$emit('deletePub', this.pubId);
+			this.$axios
+				.delete('http://localhost:8081/' + 'Publication/deletePub/' + this.pubId, {
+					headers: { token: JSON.parse(localStorage.userData) }
+				})
+				.then((response) => {
+					this.dialogData = {
+						trigger: false,
+						message: ''
+					};
+					if (response.data.error) {
+						this.$emit('callSnackbar', {
+							trigger: true,
+							color: 'red',
+							message: 'Houve um erro ao excluir a publicação'
+						});
+						return;
+					}
+
+					this.$emit('callSnackbar', {
+						trigger: true,
+						color: 'dark',
+						message: 'Publicação Excluida !'
+					});
+					this.$emit('resetBegin');
+				});
+		},
+		closeModal () {
+			this.dialogData = {
+				trigge: false,
+				message: ''
+			};
 		}
 	}
 }

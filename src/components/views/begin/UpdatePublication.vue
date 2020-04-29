@@ -270,7 +270,8 @@ export default {
 		},
 		filePicked (event) {
 			const eventFiles = event.target.files;
-			if (eventFiles.length > 4 || this.files.length + eventFiles.length > 4) {
+
+			if (eventFiles.length > 4 || this.filesManagement.backEndFiles.length + eventFiles.length > 4) {
 				this.fileError = true;
 				this.fileErrorMessage = 'Máximo 4 Arquivos';
 				return
@@ -303,8 +304,7 @@ export default {
 		closeUpdPub () {
 			this.resetData();
 			this.pubExpand = false;
-			this.$emit('resetTrigger');
-			this.$emit('resetPubId');
+			this.$emit('resetPubUpdData', this.pubUpdData.index);
 		},
 		resetData () {
 			this.dataText = '';
@@ -314,10 +314,6 @@ export default {
 				backEndFiles: [],
 				deletedFiles: []
 			};
-			this.filesManagement = {
-				backEndFiles: [],
-				deletedFiles: []
-			}
 		},
 		reduceFile (indexArray) {
 			for (let index = 0; index < this.filesManagement.backEndFiles.length; index += 1) {
@@ -336,13 +332,17 @@ export default {
 	},
 	watch: {
 		pubUpdData () {
+			this.resetData();
 			if (this.pubUpdData.trigger) {
 				this.getPubData(this.pubUpdData.pubId);
+				return;
 			}
+
+			this.pubExpand = false;
 		},
 		pubExpand () {
-			if (!this.pubExpand) {
-				this.$emit('changeUpdTrigger');
+			if (!this.pubExpand && this.pubUpdData.trigger === true) {
+				this.$emit('resetPubUpdData', this.pubUpdData.index);
 			}
 		}
 	}

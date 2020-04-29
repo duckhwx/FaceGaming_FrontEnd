@@ -1,93 +1,102 @@
 <template>
 	<v-container>
 		<CreatePub
-		@callSnackbar="callSnackbar"></CreatePub>
+		:trigger="createPubTrigger"
+		@resetCreatePub="createPubTrigger = false"
+		@callSnackbar="callSnackbar"
+		@resetBegin="resetBegin"></CreatePub>
 
 		<UpdatePub
-		v-on:resetPubId="pubIdUpdate = 0"
-		v-on:resetTrigger="pubUpdateTrigger = false"
+		@resetPubUpdData="resetPubUpdData"
 		@resetBegin="resetBegin"
 		@callSnackbar="callSnackbar"
 		:pubUpdData="pubUpdData"></UpdatePub>
 
-		<v-layout class="publications"
-		flex
-		justify-center
-		v-for="(publication, index) in publications"
-		:key="index">
-			<v-flex xs12 sm7>
-				<v-card>
-					<v-list-item>
-						<v-list-item-avatar
-						color="grey darken-2"
-						class="mx-2 my-3"
-						size="35"
+		<v-fade-transition
+		group>
+			<v-layout class="publications"
+			flex
+			justify-center
+			v-for="(publication, index) in publications"
+			v-show="publication.show"
+			:key="index">
+				<v-flex xs12 sm7>
+					<v-card>
+						<v-list-item>
+							<v-list-item-avatar
+							color="grey darken-2"
+							class="mx-2 my-3"
+							size="35"
+							>
+								<v-img
+								v-if="publication.pub.PROFILE_IMG !== ''"
+								:src="publication.pub.PROFILE_IMG"
+								></v-img>
+								<v-icon
+								size="20"
+								v-else>
+									fas fa-user
+								</v-icon>
+							</v-list-item-avatar>
+
+							<v-list-item-action>
+								<v-list-item-title>
+									{{publication.pub.USERNAME}}
+								</v-list-item-title>
+							</v-list-item-action>
+
+							<v-spacer></v-spacer>
+							<OptionsButton
+							v-if="checkUserIdPub(publication.pub.USER_ID)"
+							@resetBegin="resetBegin"
+							@callSnackbar="callSnackbar"
+							v-on:updatePub="updatePub"
+							:pubId="publication.pub.ID"
+							:index="index"></OptionsButton>
+
+						</v-list-item>
+							<v-divider></v-divider>
+						<v-card-text class="text-md-left">{{publication.pub.TITLE}}</v-card-text>
+						<v-layout
+						v-if="publication.pub.FILES.data.length > 0"
+						justify-center
 						>
-							<v-img
-							v-if="publication.PROFILE_IMG !== ''"
-							:src="publication.PROFILE_IMG"
-							></v-img>
+							<v-container fluid>
+								<v-row dense>
+									<v-col class="imgCol d-inline-block"
+									v-for="file in publication.pub.FILES.data"
+									:key="file.id"
+									:cols="file.FLEX">
+										<v-img
+											class="images align-end"
+											:src="file.FILE"
+											height="200"
+											@click="openDialogImg(publication.pub.ID)"
+										></v-img>
+									</v-col>
+								</v-row>
+							</v-container>
+						</v-layout>
+						<v-layout
+						class="mb-2 pb-6 pt-3"
+						v-if="publication.pub.FILES.error"
+						align-center
+						justify-center
+						column>
 							<v-icon
-							size="20"
-							v-else>
-								fas fa-user
+							size="40">
+								fas fa-exclamation-triangle
 							</v-icon>
-						</v-list-item-avatar>
-
-						<v-list-item-action>
-							<v-list-item-title>
-								{{publication.USERNAME}}
-							</v-list-item-title>
-						</v-list-item-action>
-
-						<v-spacer></v-spacer>
-						<OptionsButton
-						v-on:updatePub="updatePub"
-						:pubId="publication.ID"></OptionsButton>
-
-					</v-list-item>
-						<v-divider></v-divider>
-					<v-card-text class="text-md-left">{{publication.TITLE}}</v-card-text>
-					<v-layout
-					v-if="publication.FILES.data.length > 0"
-					justify-center
-					>
-						<v-container fluid>
-							<v-row dense>
-								<v-col class="imgCol d-inline-block"
-								v-for="file in publication.FILES.data"
-								:key="file.id"
-								:cols="file.FLEX">
-									<v-img
-										class="images align-end"
-										:src="file.FILE"
-										height="200"
-										@click="openDialogImg(publication.ID)"
-									></v-img>
-								</v-col>
-							</v-row>
-						</v-container>
-					</v-layout>
-					<v-layout
-					class="mb-2 pb-6 pt-3"
-					v-if="publication.FILES.error"
-					align-center
-					justify-center
-					column>
-						<v-icon
-						size="40">
-							fas fa-exclamation-triangle
-						</v-icon>
-						<div class="mt-3">Houve um erro ao coletar os arquivos</div>
-					</v-layout>
-				</v-card>
-			</v-flex>
-		</v-layout>
+							<div class="mt-3">Houve um erro ao coletar os arquivos</div>
+						</v-layout>
+					</v-card>
+				</v-flex>
+			</v-layout>
+		</v-fade-transition>
 
 		<div
 		class="mt-12 title"
-		v-if="pubsError"
-		>
+		v-if="pubsError">
 		{{pubsErrorMessage}}
 		</div>
 
@@ -99,15 +108,20 @@
 		size="40">
 		</v-progress-circular>
 
+		<CreateBtn
+		@createPubTrigger="createPub"></CreateBtn>
+
 		<PubDialog
 		@resetDialog="resetDialog"
-		:dialogFiles="dialogFiles"></PubDialog>
+		:dialogFiles="dialogFiles">
+		</PubDialog>
 	</v-container>
 </template>
 <script>
 import OptionsButton from '@/components/views/miscellaneous/OptionsButton'
 import CreatePublication from '@/components/views/begin/CreatePublication'
 import UpdatePublication from '@/components/views/begin/UpdatePublication'
+import CreateBtn from '@/components/views/miscellaneous/CreateButton'
 import PubDialog from '@/components/views/begin/DialogPub';
 
 export default {
@@ -116,7 +130,8 @@ export default {
 		OptionsButton: OptionsButton,
 		CreatePub: CreatePublication,
 		UpdatePub: UpdatePublication,
-		PubDialog: PubDialog
+		PubDialog: PubDialog,
+		CreateBtn: CreateBtn
 	},
 	data () {
 		return {
@@ -139,6 +154,9 @@ export default {
 				trigger: false,
 				pubId: 0
 			},
+			indexOfPub: null,
+			// Create Publication
+			createPubTrigger: false,
 			// Snackbar
 			snackbarTrigger: false,
 			snackbarColor: '',
@@ -165,7 +183,7 @@ export default {
 				})
 				.then((response) => {
 					console.log(response);
-					if (response.data.error && this.start === 0) {
+					if ((response.data.error && this.start === 0) || (response.data.total < 1 && this.start === 0)) {
 						this.pubsError = true;
 						this.pubsErrorMessage = response.data.message;
 						this.displayProgress = 'd-none';
@@ -196,12 +214,26 @@ export default {
 
 							file.FLEX = 6;
 						}
-						this.publications.push(pub);
+						this.publications.push({
+							pub,
+							show: true
+						});
 					}
+					console.log(this.publications[0]);
 					this.displayProgress = 'd-none';
 					this.start += 10;
 					this.verifyScroll = true;
 				});
+		},
+		checkUserIdPub (userIdFromPub) {
+			const decoded = this.$jwt(this.token);
+			const userId = decoded.userData.ID;
+
+			if (userIdFromPub !== userId) {
+				return false;
+			}
+
+			return true;
 		},
 		openDialogImg (pubId) {
 			let imgs = []
@@ -223,12 +255,6 @@ export default {
 				images: []
 			}
 		},
-		updatePub (id) {
-			this.pubUpdData = {
-				trigger: true,
-				pubId: id
-			}
-		},
 		callSnackbar (presets) {
 			this.$emit('callSnackbar', presets);
 		},
@@ -246,6 +272,38 @@ export default {
 			this.start = 0;
 			this.publications = [];
 			this.selectPubs();
+		},
+		createPub () {
+			this.createPubTrigger = !this.createPubTrigger;
+			if (this.indexOfPub !== null) {
+				this.publications[this.indexOfPub].show = true;
+			}
+			this.pubUpdData = {
+				trigger: false,
+				pubId: 0,
+				index: null
+			}
+			this.$vuetify.goTo(0, {
+				duration: 500
+			});
+		},
+		updatePub (id, index) {
+			this.createPubTrigger = false;
+			this.publications[index].show = false;
+			this.indexOfPub = index;
+			this.pubUpdData = {
+				trigger: true,
+				pubId: id,
+				index
+			}
+		},
+		resetPubUpdData (index) {
+			this.pubUpdData = {
+				trigger: false,
+				pubId: 0
+			};
+			this.indexOfPub = null;
+			this.publications[index].show = true;
 		}
 	}
 };

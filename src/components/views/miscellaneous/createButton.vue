@@ -8,7 +8,7 @@
                 right
                 bottom
                 v-on="on"
-                @click="createPubTrigger">
+                @click="trigger">
                     <v-icon>fas fa-plus</v-icon>
             </v-btn>
         </template>
@@ -20,8 +20,8 @@
 export default {
 	name: 'CreateBtn',
 	methods: {
-		createPubTrigger () {
-			this.$emit('pubTrigger');
+		trigger () {
+			this.$emit('createPubTrigger');
 		}
 	}
 }
