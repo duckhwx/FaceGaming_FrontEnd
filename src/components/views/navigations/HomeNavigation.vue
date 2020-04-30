@@ -92,6 +92,7 @@ export default {
 	methods: {
 		logout () {
 			localStorage.clear()
+			this.$socket.close();
 			this.$router.push({path: '/login'})
 		},
 		sideBarInit () {
