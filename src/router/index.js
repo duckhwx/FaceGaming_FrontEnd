@@ -6,7 +6,7 @@ import Register from '@/components/views/Register'
 import Home from '@/components/HomeView'
 import Begin from '@/components/views/begin/Begin'
 import Profile from '@/components/views/user/Profile'
-import EditProfile from '@/components/views/dashboards/EditProfile'
+import EditProfileInfo from '@/components/views/user/EditProfileInfo'
 import Friends from '@/components/views/friends/Friends'
 
 Vue.use(Router)
@@ -32,7 +32,7 @@ const router = new Router({
 			children: [
 				{path: '/inicio', name: 'Inicio', component: Begin},
 				{path: '/profile', name: 'Profile', component: Profile},
-				{path: '/editProfile', name: 'EditProfile', component: EditProfile},
+				{path: '/editProfileInfo', name: 'EditProfileInfo', component: EditProfileInfo},
 				{path: '/friends', name: 'Friends', component: Friends},
 				{path: '*', redirect: '/inicio'}
 			]

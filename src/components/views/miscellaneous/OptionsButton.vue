@@ -28,18 +28,18 @@
 				</v-list-item>
 			</v-list>
 		</v-menu>
-		<DialogModal
+		<DialogModalDelete
 		@action="deletePub"
 		@closeModal="closeModal"
-		:dialogData="dialogData"></DialogModal>
+		:dialogData="dialogData"></DialogModalDelete>
 	</div>
 </template>
 
 <script>
-import DialogModal from '@/components/views/miscellaneous/DialogModal';
+import DialogModalDelete from '@/components/views/miscellaneous/DialogModalDelete';
 export default {
 	components: {
-		DialogModal: DialogModal
+		DialogModalDelete: DialogModalDelete
 	},
 	props: {
 		pubId: {
@@ -82,7 +82,7 @@ export default {
 					if (response.data.error) {
 						this.$emit('callSnackbar', {
 							trigger: true,
-							color: 'red',
+							color: 'red darken-4',
 							message: 'Houve um erro ao excluir a publicação'
 						});
 						return;

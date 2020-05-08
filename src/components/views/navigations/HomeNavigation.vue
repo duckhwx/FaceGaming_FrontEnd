@@ -1,6 +1,8 @@
 <template>
     <div>
-        <v-app-bar fixed dark>
+        <v-app-bar
+        fixed
+        dark>
             <v-app-bar-nav-icon
             v-if="resmd < 960"
             @click="navDrawer = !navDrawer">
@@ -106,15 +108,22 @@ export default {
 }
 </script>
 <style>
-    .links{
+    .links {
         font-size: 19px;
     }
 
-    .headLink{
+    .headLink {
         font-size: 23px;
     }
 
-    .navDivider{
-        margin-bottom: 6%;
+    @media only screen and (max-width: 960px) {
+        .navDivider {
+            margin-bottom: 57px;
+        }
+    }
+    @media only screen and (min-width: 961px) {
+        .navDivider {
+            margin-bottom: 66px;
+        }
     }
 </style>

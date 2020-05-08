@@ -5,7 +5,9 @@
         <v-card
         class="py-2 px-2">
             <div
-            class="my-2 message">{{dialogData.message}}</div>
+            class="my-2 message">{{dialogData.message}}
+			</div>
+
             <v-btn
             class="my-2"
             @click="emitFunction"

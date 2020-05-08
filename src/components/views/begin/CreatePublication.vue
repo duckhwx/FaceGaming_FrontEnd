@@ -141,7 +141,7 @@ export default {
 						if (response.data.error) {
 							this.$emit('callSnackbar', {
 								trigger: true,
-								color: 'red',
+								color: 'red darken-4',
 								message: response.data.message
 							});
 							return
@@ -182,7 +182,7 @@ export default {
 					if (response.data.status) {
 						this.$emit('callSnackbar', {
 							trigger: true,
-							color: 'red',
+							color: 'red darken-4',
 							message: response.data.message
 						});
 						return;

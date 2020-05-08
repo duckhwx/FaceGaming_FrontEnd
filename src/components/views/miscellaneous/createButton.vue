@@ -12,16 +12,21 @@
                     <v-icon>fas fa-plus</v-icon>
             </v-btn>
         </template>
-    <span>Criar Publicação</span>
+    <span>{{presets.templateText}}</span>
     </v-tooltip>
 </template>
 
 <script>
 export default {
-	name: 'CreateBtn',
+	props: {
+		presets: {
+			type: Object,
+			required: true
+		}
+	},
 	methods: {
 		trigger () {
-			this.$emit('createPubTrigger');
+			this.$emit('createTrigger');
 		}
 	}
 }

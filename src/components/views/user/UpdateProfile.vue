@@ -167,7 +167,7 @@ export default {
 			if (this.editImg.profile === '' && this.editImg.background === '') {
 				this.$emit('callSnackbar', {
 					trigger: true,
-					color: 'red',
+					color: 'red darken-4',
 					message: 'Insira uma imagem'
 				});
 				return;
@@ -199,7 +199,7 @@ export default {
 			if (error) {
 				this.$emit('callSnackbar', {
 					trigger: true,
-					color: 'red',
+					color: 'red darken-4',
 					message: 'Houve um erro ao atualizar as imagens de Perfil/Capa'
 				});
 			}
@@ -280,7 +280,7 @@ export default {
 			if (file.name.lastIndexOf('.') <= 0) {
 				this.$emit('callSnackbar', {
 					trigger: true,
-					color: 'red',
+					color: 'red darken-4',
 					message: 'Arquivo Invalido'
 				});
 				return;
@@ -289,7 +289,7 @@ export default {
 			if (!fileTypes.includes(fileType)) {
 				this.$emit('callSnackbar', {
 					trigger: true,
-					color: 'red',
+					color: 'red darken-4',
 					message: 'Formato invalido, apenas permitido (.jpg, .gif, .png)'
 				});
 				return;
@@ -298,7 +298,7 @@ export default {
 			if (file.size > 1000000) {
 				this.$emit('callSnackbar', {
 					trigger: true,
-					color: 'red',
+					color: 'red darken-4',
 					message: 'Tamanho maior que 10 MB'
 				});
 				return;

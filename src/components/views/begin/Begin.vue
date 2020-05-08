@@ -109,7 +109,11 @@
 		</v-progress-circular>
 
 		<CreateBtn
-		@createPubTrigger="createPub"></CreateBtn>
+		:presets="{
+			status: false,
+			templateText: 'Criar Publicação'
+		}"
+		@createTrigger="createPub"></CreateBtn>
 
 		<PubDialog
 		@resetDialog="resetDialog"

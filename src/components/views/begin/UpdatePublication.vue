@@ -149,7 +149,7 @@ export default {
 					if (response.data.error.status && response.data.error.type === 'text') {
 						this.$emit('callSnackbar', {
 							trigger: true,
-							color: 'red',
+							color: 'red darken-4',
 							message: 'Houve um erro ao coletar os dados da publicação'
 						});
 						return;
@@ -160,7 +160,7 @@ export default {
 					if (response.data.error.status && response.data.error.type === 'files') {
 						this.$emit('callSnackbar', {
 							trigger: true,
-							color: 'red',
+							color: 'red darken-4',
 							message: 'Houve um erro ao coletar os arquivos da publicação'
 						});
 						return;
@@ -206,7 +206,7 @@ export default {
 						if (response.data.error) {
 							this.$emit('callSnackbar', {
 								trigger: true,
-								color: 'red',
+								color: 'red darken-4',
 								message: 'Houve um erro ao atualizar a publicação'
 							});
 							return;
@@ -243,7 +243,7 @@ export default {
 								if (response.data.status) {
 									this.$emit('callSnackbar', {
 										trigger: true,
-										color: 'red',
+										color: 'red darken-4',
 										message: 'Houve um erro ao atualizar os arquivos'
 									});
 								}

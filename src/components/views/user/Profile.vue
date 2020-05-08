@@ -1,5 +1,5 @@
 <template>
-<v-container>
+<div>
 	<v-layout
     class="mt-4"
     flex
@@ -11,70 +11,71 @@
                 height="350"
                 gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.6)"
                 >
+                <v-container
+                class="fill-height coverContainer">
                     <v-row
-                    align="end"
-                    class="fill-height">
-                        <div>
-                            <v-col>
-                                <v-avatar
-                                class="ml-12"
-                                color="grey darken-3"
-                                size="120"
-                                >
-                                    <v-icon
-                                    v-if="images.profImg === ''"
-                                    size="50">
-                                        fas fa-user
-                                    </v-icon>
-                                    <v-img
-                                    v-else
-                                    :src="images.profImg"
-                                    >
-                                    </v-img>
-                                    <v-tooltip
-                                    color="grey darken-3"
-                                    bottom>
-                                        <template v-slot:activator="{ on }">
-                                            <v-btn
-                                            class="mt-10 ml-11"
-                                            dark
-                                            fixed
-                                            fab
-                                            x-small
-                                            v-on="on"
-                                            @click="editProfDialog = true">
-                                                <v-icon
-                                                size="15">
-                                                    fas fa-camera
-                                                </v-icon>
-                                            </v-btn>
-                                        </template>
-                                            <span>Editar Imagem</span>
-                                    </v-tooltip>
-                                </v-avatar>
-                            </v-col>
-                        </div>
-                            <v-col>
-                                <v-card-title
-                                class="display-1"
-                                >
-                                {{username}}
-                                </v-card-title>
-                            </v-col>
-                            <v-col>
-
-                            </v-col>
+                    justify="end">
+                        <v-btn
+                        dark
+                        to="/editProfileInfo">
+                            Alterar Perfil
+                        </v-btn>
                     </v-row>
+                    <v-row
+                    align="end">
+                        <v-col
+                        cols="2">
+                            <v-avatar
+                            class="ml-12"
+                            color="grey darken-3"
+                            size="120"
+                            >
+                                <v-icon
+                                v-if="images.profImg === ''"
+                                size="50">
+                                    fas fa-user
+                                </v-icon>
+                                <v-img
+                                v-else
+                                :src="images.profImg"
+                                >
+                                </v-img>
+                                <v-tooltip
+                                color="grey darken-3"
+                                bottom>
+                                    <template v-slot:activator="{ on }">
+                                        <v-btn
+                                        class="mt-10 ml-11"
+                                        dark
+                                        fixed
+                                        fab
+                                        x-small
+                                        v-on="on"
+                                        @click="editProfDialog = true">
+                                            <v-icon
+                                            size="15">
+                                                fas fa-camera
+                                            </v-icon>
+                                        </v-btn>
+                                    </template>
+                                        <span>Editar Imagem</span>
+                                </v-tooltip>
+                            </v-avatar>
+                        </v-col>
+                        <v-col
+                        cols="10">
+                            <v-card-title
+                            class="display-1"
+                            >
+                            {{username}}
+                            </v-card-title>
+                        </v-col>
+                    </v-row>
+                </v-container>
                 </v-img>
             </v-card>
         </v-flex>
     </v-layout>
-
-    <v-btn
-    dark
-    :to="editProfile">
-        Alterar Perfil
-    </v-btn>
 
     <updateProfile
     @selectProfImages="getProfileData()"
@@ -83,10 +84,11 @@
     :editProfDialog="editProfDialog"
     :images="images"
     :editImgPreview="editImgPreview"></updateProfile>
-</v-container>
+</div>
 </template>
 <script>
 import updateProfile from '@/components/views/user/UpdateProfile'
+
 export default {
 	components: {
 		updateProfile: updateProfile
@@ -94,7 +96,6 @@ export default {
 	data () {
 		return {
 			username: '',
-			editProfile: '/editProfile',
 			images: {
 				profImg: '',
 				profImgName: '',
@@ -119,7 +120,6 @@ export default {
 					headers: { token: this.token }
 				})
 				.then((response) => {
-					console.log(response);
 					if (response.data.error) {
 						return;
 					}
@@ -144,5 +144,8 @@ export default {
 .v-dialog {
     overflow-y: scroll !important;
     overflow-x: hidden !important;
+}
+.coverContainer {
+    align-items: unset !important;
 }
 </style>
